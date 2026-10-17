@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng ký thành viên – {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-header">
+      <div class="auth-icon-circle">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+      <h2 class="auth-title">Đăng ký thành viên mới</h2>
+      <p class="auth-subtitle">Gia nhập cộng đồng CoffeeShop để nhận nhiều ưu đãi và quản lý đơn hàng tiện lợi</p>
+    </div>
+
+    <form method="POST" action="/register" class="auth-form" id="register-form">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="username" class="form-label">
+            <i class="fa-solid fa-at"></i> Tên đăng nhập <span class="text-danger">*</span>
+          </label>
+          <div class="input-wrap">
+            <input type="text" id="username" name="username" class="form-input" 
+                   placeholder="Ví dụ: nguyenvana" required autofocus 
+                   pattern="[a-zA-Z0-9_]{3,20}" title="3-20 ký tự, không dấu, chỉ chữ cái, số và gạch dưới"
+                   value="{{ form_data.username if form_data else '' }}">
+          </div>
+          <small class="form-hint">3-20 ký tự (chữ, số hoặc gạch dưới)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="full_name" class="form-label">
+            <i class="fa-solid fa-signature"></i> Họ và tên <span class="text-danger">*</span>
+          </label>
+          <div class="input-wrap">
+            <input type="text" id="full_name" name="full_name" class="form-input" 
+                   placeholder="Ví dụ: Nguyễn Văn An" required
+                   value="{{ form_data.full_name if form_data else '' }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="email" class="form-label">
+            <i class="fa-solid fa-envelope"></i> Địa chỉ Email <span class="text-danger">*</span>
+          </label>
+          <div class="input-wrap">
+            <input type="email" id="email" name="email" class="form-input" 
+                   placeholder="email@example.com" required
+                   value="{{ form_data.email if form_data else '' }}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone" class="form-label">
+            <i class="fa-solid fa-phone"></i> Số điện thoại
+          </label>
+          <div class="input-wrap">
+            <input type="tel" id="phone" name="phone" class="form-input" 
+                   placeholder="Ví dụ: 0901234567"
+                   value="{{ form_data.phone if form_data else '' }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address" class="form-label">
+          <i class="fa-solid fa-location-dot"></i> Địa chỉ giao hàng mặc định
+        </label>
+        <div class="input-wrap">
+          <input type="text" id="address" name="address" class="form-input" 
+                 placeholder="Số nhà, đường, phường, quận..."
+                 value="{{ form_data.address if form_data else '' }}">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="password" class="form-label">
+            <i class="fa-solid fa-lock"></i> Mật khẩu <span class="text-danger">*</span>
+          </label>
+          <div class="input-wrap input-password-wrap">
+            <input type="password" id="password" name="password" class="form-input" 
+                   placeholder="Tối thiểu 6 ký tự..." required minlength="6">
+            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('password', this)" title="Ẩn/hiện mật khẩu">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password" class="form-label">
+            <i class="fa-solid fa-shield-halved"></i> Xác nhận mật khẩu <span class="text-danger">*</span>
+          </label>
+          <div class="input-wrap input-password-wrap">
+            <input type="password" id="confirm_password" name="confirm_password" class="form-input" 
+                   placeholder="Nhập lại mật khẩu..." required minlength="6">
+            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('confirm_password', this)" title="Ẩn/hiện mật khẩu">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <small id="pw-match-msg" class="form-hint"></small>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-register">
+        <i class="fa-solid fa-user-check"></i> Hoàn tất đăng ký
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Đã có tài khoản? <a href="/login" class="auth-link">Đăng nhập tại đây</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function togglePasswordVisibility(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fa-regular fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fa-regular fa-eye';
+    }
+  }
+
+  const pw = document.getElementById('password');
+  const cpw = document.getElementById('confirm_password');
+  const msg = document.getElementById('pw-match-msg');
+
+  function checkPasswords() {
+    if (!cpw.value) {
+      msg.textContent = '';
+      return;
+    }
+    if (pw.value === cpw.value) {
+      msg.textContent = '✓ Mật khẩu trùng khớp';
+      msg.className = 'form-hint text-success';
+    } else {
+      msg.textContent = '✗ Mật khẩu xác nhận không khớp';
+      msg.className = 'form-hint text-danger';
+    }
+  }
+
+  pw.addEventListener('input', checkPasswords);
+  cpw.addEventListener('input', checkPasswords);
+</script>
+{% endblock %}

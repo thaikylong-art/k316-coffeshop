@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết đơn hàng #{{ order.order_code }} – {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="container page-order-detail">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Đường dẫn">
+    <a href="/"><i class="fa-solid fa-house"></i> Trang chủ</a>
+    <span class="bc-sep">/</span>
+    <a href="/orders">Đơn hàng của tôi</a>
+    <span class="bc-sep">/</span>
+    <span class="bc-current">Đơn hàng #{{ order.order_code }}</span>
+  </nav>
+
+  <!-- Detail Header Card -->
+  <div class="card order-detail-header-card">
+    <div class="header-top-row">
+      <div>
+        <h2 class="order-detail-title">
+          <i class="fa-solid fa-receipt text-caramel"></i> Đơn hàng: {{ order.order_code }}
+        </h2>
+        <p class="order-detail-date">
+          <i class="fa-regular fa-calendar-days"></i> Đặt lúc: {{ order.created_at }}
+        </p>
+      </div>
+      <div class="order-header-status">
+        <span class="badge badge-status badge-{{ order.status_class }} badge-lg">
+          {{ order.status_icon | safe }} {{ order.status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Timeline tiến trình đơn hàng -->
+    {% if order.status != 'Đã hủy' %}
+    <div class="order-timeline">
+      <div class="timeline-step {% if order.timeline_step >= 1 %}completed{% endif %} {% if order.timeline_step == 1 %}current{% endif %}">
+        <div class="step-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="step-label">Chờ xác nhận</div>
+      </div>
+      <div class="timeline-line {% if order.timeline_step >= 2 %}completed{% endif %}"></div>
+      <div class="timeline-step {% if order.timeline_step >= 2 %}completed{% endif %} {% if order.timeline_step == 2 %}current{% endif %}">
+        <div class="step-icon"><i class="fa-solid fa-blender"></i></div>
+        <div class="step-label">Đang pha chế</div>
+      </div>
+      <div class="timeline-line {% if order.timeline_step >= 3 %}completed{% endif %}"></div>
+      <div class="timeline-step {% if order.timeline_step >= 3 %}completed{% endif %} {% if order.timeline_step == 3 %}current{% endif %}">
+        <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+        <div class="step-label">Đang giao hàng</div>
+      </div>
+      <div class="timeline-line {% if order.timeline_step >= 4 %}completed{% endif %}"></div>
+      <div class="timeline-step {% if order.timeline_step >= 4 %}completed{% endif %} {% if order.timeline_step == 4 %}current{% endif %}">
+        <div class="step-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="step-label">Hoàn thành</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger mt-3">
+      <i class="fa-solid fa-ban"></i> Đơn hàng này đã bị hủy.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Detail Content Grid -->
+  <div class="order-detail-layout">
+    <!-- Cột trái: Danh sách món & Bảng giá -->
+    <div class="order-detail-main">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title-lg">
+            <i class="fa-solid fa-mug-hot text-caramel"></i> Danh sách món đã đặt ({{ order.order_items | length }})
+          </h3>
+        </div>
+
+        <div class="order-table-responsive">
+          <table class="order-items-table">
+            <thead>
+              <tr>
+                <th>Món</th>
+                <th>Tên món</th>
+                <th class="text-center">Đơn giá</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-right">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in order.order_items %}
+              <tr>
+                <td class="col-img">
+                  <div class="table-img-wrap">
+                    <img src="/{{ it.product_image }}" alt="{{ it.product_name }}" onerror="this.src='/static/images/fallback.png'">
+                  </div>
+                </td>
+                <td class="col-name">
+                  <strong>{{ it.product_name }}</strong>
+                </td>
+                <td class="text-center col-price">{{ it.price | format_price }}</td>
+                <td class="text-center col-qty"><strong>&times; {{ it.quantity }}</strong></td>
+                <td class="text-right col-subtotal">{{ it.subtotal | format_price }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="order-summary-box">
+          <div class="summary-line">
+            <span>Tạm tính:</span>
+            <span>{{ order.total_amount | format_price }}</span>
+          </div>
+          <div class="summary-line">
+            <span>Phí giao hàng:</span>
+            <span class="text-success">Miễn phí giao hàng</span>
+          </div>
+          <div class="summary-line total-line">
+            <span>Tổng cộng thanh toán:</span>
+            <span class="total-price">{{ order.total_amount | format_price }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột phải: Thông tin nhận hàng & Thao tác -->
+    <aside class="order-detail-aside">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title-lg">
+            <i class="fa-solid fa-location-dot text-caramel"></i> Thông tin giao hàng
+          </h3>
+        </div>
+        <div class="delivery-info">
+          <p class="delivery-row">
+            <span class="delivery-label"><i class="fa-solid fa-user"></i> Người nhận:</span>
+            <span class="delivery-val"><strong>{{ order.recipient_name }}</strong></span>
+          </p>
+          <p class="delivery-row">
+            <span class="delivery-label"><i class="fa-solid fa-phone"></i> Điện thoại:</span>
+            <span class="delivery-val"><strong>{{ order.recipient_phone }}</strong></span>
+          </p>
+          <p class="delivery-row">
+            <span class="delivery-label"><i class="fa-solid fa-map-pin"></i> Địa chỉ nhận:</span>
+            <span class="delivery-val">{{ order.recipient_address }}</span>
+          </p>
+          <p class="delivery-row">
+            <span class="delivery-label"><i class="fa-solid fa-money-bill-wave"></i> Thanh toán:</span>
+            <span class="delivery-val">Thanh toán khi nhận hàng (COD)</span>
+          </p>
+          {% if order.notes %}
+          <div class="delivery-notes">
+            <span class="delivery-label"><i class="fa-solid fa-note-sticky"></i> Ghi chú món:</span>
+            <p class="notes-text">{{ order.notes }}</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="order-detail-actions">
+          {% if order.status == 'Chờ xác nhận' %}
+          <form method="POST" action="/orders/{{ order.id }}/cancel" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+            <button type="submit" class="btn btn-danger-outline btn-block">
+              <i class="fa-solid fa-ban"></i> Hủy đơn hàng này
+            </button>
+          </form>
+          {% endif %}
+          <a href="/orders" class="btn btn-outline btn-block">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn
+          </a>
+          <a href="/#menu-section" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-mug-hot"></i> Đặt thêm món khác
+          </a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

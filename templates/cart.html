@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Giỏ hàng & Đặt hàng – {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="container page-cart">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="fa-solid fa-cart-shopping text-caramel"></i> Giỏ hàng của bạn</h2>
+      <p class="page-subtitle">Kiểm tra lại các món đã chọn và hoàn tất thông tin nhận hàng</p>
+    </div>
+  </div>
+
+  {% if cart_items %}
+  <div class="cart-layout">
+    <!-- Cột trái: Danh sách món -->
+    <div class="cart-main">
+      <div class="card">
+        <div class="cart-items-list">
+          {% for item in cart_items %}
+          <div class="cart-item-card" data-product-id="{{ item.product.id }}">
+            <div class="cart-item-media">
+              <img src="/{{ item.product.image }}" alt="{{ item.product.name }}" onerror="this.src='/static/images/fallback.png'">
+            </div>
+            <div class="cart-item-info">
+              <span class="card-cat">{{ item.product.category_name }}</span>
+              <h4 class="cart-item-title">{{ item.product.name }}</h4>
+              <p class="cart-item-unit-price">{{ item.product.price | format_price }}</p>
+            </div>
+            <div class="cart-item-qty">
+              <form method="POST" action="/cart/update" class="qty-form">
+                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                <div class="qty-control">
+                  <button type="submit" name="action" value="decrease" class="btn-qty" title="Giảm"><i class="fa-solid fa-minus"></i></button>
+                  <span class="qty-number">{{ item.quantity }}</span>
+                  <button type="submit" name="action" value="increase" class="btn-qty" title="Tăng"><i class="fa-solid fa-plus"></i></button>
+                </div>
+              </form>
+            </div>
+            <div class="cart-item-subtotal">
+              <strong>{{ item.subtotal | format_price }}</strong>
+            </div>
+            <div class="cart-item-remove">
+              <form method="POST" action="/cart/update">
+                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                <input type="hidden" name="action" value="remove">
+                <button type="submit" class="btn-remove-item" title="Xóa món này">&times;</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="cart-actions-bar">
+          <a href="/#menu-section" class="btn btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-left"></i> Chọn thêm món khác
+          </a>
+          <form method="POST" action="/cart/clear" onsubmit="return confirm('Bạn có chắc muốn xóa tất cả món trong giỏ hàng?');">
+            <button type="submit" class="btn btn-danger-outline btn-sm">
+              <i class="fa-solid fa-trash-can"></i> Xóa toàn bộ giỏ
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột phải: Form thông tin giao hàng & Xác nhận đặt hàng -->
+    <aside class="cart-aside">
+      <div class="card checkout-card">
+        <div class="card-header">
+          <h3 class="card-title-lg">
+            <i class="fa-solid fa-truck-fast text-caramel"></i> Thông tin giao hàng
+          </h3>
+        </div>
+
+        {% if current_user %}
+        <form method="POST" action="/checkout" id="checkout-form">
+          <div class="form-group">
+            <label for="recipient_name" class="form-label">Họ và tên người nhận <span class="text-danger">*</span></label>
+            <input type="text" id="recipient_name" name="recipient_name" class="form-input" 
+                   value="{{ current_user.full_name }}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="recipient_phone" class="form-label">Số điện thoại liên hệ <span class="text-danger">*</span></label>
+            <input type="tel" id="recipient_phone" name="recipient_phone" class="form-input" 
+                   value="{{ current_user.phone or '' }}" placeholder="Ví dụ: 0901234567" required>
+          </div>
+
+          <div class="form-group">
+            <label for="recipient_address" class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+            <input type="text" id="recipient_address" name="recipient_address" class="form-input" 
+                   value="{{ current_user.address or '' }}" placeholder="Số nhà, đường, phường, quận..." required>
+          </div>
+
+          <div class="form-group">
+            <label for="notes" class="form-label">Ghi chú cho quán (tùy chọn)</label>
+            <textarea id="notes" name="notes" class="form-input" rows="2" 
+                      placeholder="Ví dụ: Ít đường, nhiều đá, giao lên phòng 302..."></textarea>
+          </div>
+
+          <hr class="dropdown-divider">
+
+          <div class="order-summary-box mb-3">
+            <div class="summary-line">
+              <span>Tổng số lượng:</span>
+              <span><strong>{{ total_quantity }} món</strong></span>
+            </div>
+            <div class="summary-line">
+              <span>Tạm tính:</span>
+              <span>{{ total_amount | format_price }}</span>
+            </div>
+            <div class="summary-line">
+              <span>Phí vận chuyển:</span>
+              <span class="text-success">0 đ (Miễn phí)</span>
+            </div>
+            <div class="summary-line total-line">
+              <span>Tổng thanh toán:</span>
+              <span class="total-price">{{ total_amount | format_price }}</span>
+            </div>
+          </div>
+
+          <div class="payment-method-box">
+            <i class="fa-solid fa-money-bill-wave text-caramel"></i>
+            <div>
+              <strong>Thanh toán tiền mặt khi nhận hàng (COD)</strong>
+              <p class="text-muted text-sm">Quý khách thanh toán trực tiếp cho nhân viên giao hàng khi nhận món</p>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg mt-3" id="btn-checkout">
+            <i class="fa-solid fa-check"></i> Xác nhận đặt hàng
+          </button>
+        </form>
+        {% else %}
+        <div class="auth-required-box">
+          <i class="fa-solid fa-user-lock auth-req-icon"></i>
+          <h4>Đăng nhập để đặt hàng</h4>
+          <p>Vui lòng đăng nhập hoặc đăng ký tài khoản để CoffeeShop lưu thông tin giao hàng và tích điểm cho bạn!</p>
+          <div class="auth-req-buttons">
+            <a href="/login?next=/cart" class="btn btn-primary btn-block">
+              <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập ngay
+            </a>
+            <a href="/register?next=/cart" class="btn btn-outline btn-block">
+              <i class="fa-solid fa-user-plus"></i> Đăng ký tài khoản mới
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+  {% else %}
+  <div class="card empty-cart-card">
+    <div class="empty-state">
+      <i class="fa-solid fa-cart-shopping empty-icon"></i>
+      <h3>Giỏ hàng của bạn đang trống</h3>
+      <p>Bạn chưa chọn món nào. Hãy ghé qua thực đơn và thêm những ly cà phê hoặc bánh ngọt hấp dẫn vào giỏ nhé!</p>
+      <a href="/#menu-section" class="btn btn-primary btn-lg mt-3">
+        <i class="fa-solid fa-mug-hot"></i> Khám phá thực đơn CoffeeShop
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

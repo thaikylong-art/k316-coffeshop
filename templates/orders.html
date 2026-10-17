@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Đơn hàng của tôi – {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="container page-orders">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><i class="fa-solid fa-receipt text-caramel"></i> Đơn hàng của tôi</h2>
+      <p class="page-subtitle">Theo dõi tiến trình pha chế, trạng thái giao hàng và lịch sử đặt món của bạn</p>
+    </div>
+    <div>
+      <a href="/#menu-section" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Đặt món mới
+      </a>
+    </div>
+  </div>
+
+  <!-- Bộ lọc trạng thái đơn hàng -->
+  <div class="order-filter-tabs">
+    <a href="/orders" class="order-tab {% if not current_status %}active{% endif %}">
+      Tất cả <span class="order-tab-count">({{ status_counts.total }})</span>
+    </a>
+    <a href="/orders?status=Chờ xác nhận" class="order-tab {% if current_status == 'Chờ xác nhận' %}active{% endif %}">
+      Chờ xác nhận <span class="order-tab-count">({{ status_counts.pending }})</span>
+    </a>
+    <a href="/orders?status=Đang pha chế" class="order-tab {% if current_status == 'Đang pha chế' %}active{% endif %}">
+      Đang pha chế <span class="order-tab-count">({{ status_counts.brewing }})</span>
+    </a>
+    <a href="/orders?status=Đang giao hàng" class="order-tab {% if current_status == 'Đang giao hàng' %}active{% endif %}">
+      Đang giao hàng <span class="order-tab-count">({{ status_counts.shipping }})</span>
+    </a>
+    <a href="/orders?status=Hoàn thành" class="order-tab {% if current_status == 'Hoàn thành' %}active{% endif %}">
+      Hoàn thành <span class="order-tab-count">({{ status_counts.completed }})</span>
+    </a>
+    <a href="/orders?status=Đã hủy" class="order-tab {% if current_status == 'Đã hủy' %}active{% endif %}">
+      Đã hủy <span class="order-tab-count">({{ status_counts.cancelled }})</span>
+    </a>
+  </div>
+
+  <!-- Danh sách đơn hàng -->
+  {% if orders %}
+  <div class="orders-list">
+    {% for o in orders %}
+    <div class="card order-card">
+      <div class="order-card-header">
+        <div class="order-header-info">
+          <span class="order-code">
+            <i class="fa-solid fa-hashtag text-caramel"></i> {{ o.order_code }}
+          </span>
+          <span class="order-date">
+            <i class="fa-regular fa-clock"></i> {{ o.created_at }}
+          </span>
+        </div>
+        <div class="order-header-status">
+          <span class="badge badge-status badge-{{ o.status_class }}">
+            {{ o.status_icon | safe }} {{ o.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="order-card-body">
+        <div class="order-items-preview">
+          {% for item in o.order_items %}
+          <div class="order-item-row">
+            <div class="order-item-thumb">
+              <img src="/{{ item.product_image }}" alt="{{ item.product_name }}" onerror="this.src='/static/images/fallback.png'">
+            </div>
+            <div class="order-item-details">
+              <h4 class="order-item-name">{{ item.product_name }}</h4>
+              <p class="order-item-meta">
+                {{ item.price | format_price }} &times; {{ item.quantity }}
+              </p>
+            </div>
+            <div class="order-item-subtotal">
+              {{ item.subtotal | format_price }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if o.notes %}
+        <div class="order-notes-preview">
+          <i class="fa-regular fa-comment-dots text-muted"></i>
+          <span><strong>Ghi chú:</strong> {{ o.notes }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="order-card-footer">
+        <div class="order-shipping-brief">
+          <p class="text-muted"><i class="fa-solid fa-location-dot"></i> {{ o.recipient_name }} &middot; {{ o.recipient_phone }} &middot; {{ o.recipient_address }}</p>
+        </div>
+        <div class="order-total-action">
+          <div class="order-total-box">
+            <span class="total-label">Tổng thanh toán:</span>
+            <span class="total-val">{{ o.total_amount | format_price }}</span>
+          </div>
+          <div class="order-actions-btns">
+            <a href="/orders/{{ o.id }}" class="btn btn-outline btn-sm">
+              <i class="fa-solid fa-eye"></i> Chi tiết đơn
+            </a>
+            {% if o.status == 'Chờ xác nhận' %}
+            <form method="POST" action="/orders/{{ o.id }}/cancel" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+              <button type="submit" class="btn btn-danger-outline btn-sm">
+                <i class="fa-solid fa-xmark"></i> Hủy đơn
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card empty-orders-card">
+    <div class="empty-state">
+      <i class="fa-solid fa-receipt empty-icon"></i>
+      <h3>Chưa có đơn hàng nào {% if current_status %}ở trạng thái "{{ current_status }}"{% endif %}</h3>
+      <p>Hãy chọn những món cà phê và bánh thơm ngon từ thực đơn để thưởng thức ngay!</p>
+      <a href="/#menu-section" class="btn btn-primary btn-lg mt-3">
+        <i class="fa-solid fa-mug-hot"></i> Khám phá thực đơn CoffeeShop
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

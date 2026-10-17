@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CoffeeShop – Thực đơn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <h1 class="brand"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i> <span id="store-name">CoffeeShop</span></h1>
+        <p class="slogan" id="store-slogan"></p>
+      </div>
+      <p class="hours" id="store-hours"></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="featured" aria-labelledby="featured-title">
+      <h2 id="featured-title">Gợi ý hôm nay</h2>
+      <div class="featured-list" id="featured-list"></div>
+    </section>
+
+    <section class="menu" aria-labelledby="menu-title">
+      <h2 id="menu-title">Thực đơn</h2>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="toolbar">
+        <label class="search">
+          <span class="visually-hidden">Tìm món</span>
+          <input type="search" id="search" placeholder="Tìm món… (gõ không dấu cũng được)" autocomplete="off">
+        </label>
+        <label class="sort">
+          <span>Sắp xếp:</span>
+          <select id="sort">
+            <option value="default">Mặc định</option>
+            <option value="price-asc">Giá tăng dần</option>
+            <option value="price-desc">Giá giảm dần</option>
+          </select>
+        </label>
+      </div>
+      <p class="cat-desc" id="cat-desc" hidden></p>
+      <p class="result-count" id="result-count" aria-live="polite"></p>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden>Không tìm thấy món phù hợp.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong id="footer-name">CoffeeShop</strong>
+        <p id="footer-address"></p>
+        <p id="footer-contact"></p>
+        <p id="footer-hours"></p>
+      </div>
+      <p class="copyright" id="footer-copyright"></p>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" type="button" aria-label="Đóng" data-close><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      <div class="modal-media" id="modal-media"></div>
+      <div class="modal-body">
+        <span class="badge" id="modal-cat"></span>
+        <h3 id="modal-title"></h3>
+        <p class="price" id="modal-price"></p>
+        <p class="modal-desc" id="modal-desc"></p>
+        <a class="btn btn-order" id="modal-order" href="#">Đặt món</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

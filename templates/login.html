@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng nhập – {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon-circle">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <h2 class="auth-title">Chào mừng trở lại!</h2>
+      <p class="auth-subtitle">Đăng nhập tài khoản CoffeeShop để đặt món và theo dõi đơn hàng</p>
+    </div>
+
+    <!-- Quick test account banner -->
+    <div class="demo-account-box">
+      <div class="demo-account-header">
+        <i class="fa-solid fa-wand-magic-sparkles text-caramel"></i>
+        <strong>Tài khoản dùng thử:</strong>
+      </div>
+      <p class="demo-account-body">
+        Tài khoản: <code>khachhang</code> &middot; Mật khẩu: <code>123456</code>
+      </p>
+      <button type="button" class="btn btn-sm btn-outline" id="btn-fill-demo">
+        <i class="fa-solid fa-bolt"></i> Điền nhanh tài khoản mẫu
+      </button>
+    </div>
+
+    <form method="POST" action="/login" class="auth-form" id="login-form">
+      <input type="hidden" name="next" value="{{ next_url or '' }}">
+
+      <div class="form-group">
+        <label for="username_or_email" class="form-label">
+          <i class="fa-solid fa-user"></i> Tên đăng nhập hoặc Email
+        </label>
+        <div class="input-wrap">
+          <input type="text" id="username_or_email" name="username_or_email" class="form-input" 
+                 placeholder="Nhập tên đăng nhập hoặc email..." required autofocus value="{{ username or '' }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label-row">
+          <label for="password" class="form-label">
+            <i class="fa-solid fa-lock"></i> Mật khẩu
+          </label>
+        </div>
+        <div class="input-wrap input-password-wrap">
+          <input type="password" id="password" name="password" class="form-input" 
+                 placeholder="Nhập mật khẩu..." required>
+          <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('password', this)" title="Ẩn/hiện mật khẩu">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">
+        <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Chưa có tài khoản thành viên? <a href="/register" class="auth-link">Đăng ký ngay tại đây</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function togglePasswordVisibility(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fa-regular fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fa-regular fa-eye';
+    }
+  }
+
+  const fillBtn = document.getElementById('btn-fill-demo');
+  if (fillBtn) {
+    fillBtn.addEventListener('click', function() {
+      document.getElementById('username_or_email').value = 'khachhang';
+      document.getElementById('password').value = '123456';
+    });
+  }
+</script>
+{% endblock %}

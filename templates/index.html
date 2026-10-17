@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}{{ store.name }} – Thực đơn cà phê phin & bánh ngọt{% endblock %}
+
+{% block content %}
+<div class="container page-home">
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <span class="hero-badge"><i class="fa-solid fa-fire"></i> Trải nghiệm tinh hoa</span>
+      <h2 class="hero-title">Cà Phê Phin Đậm Đà · Hương Vị Việt Nam</h2>
+      <p class="hero-desc">Từng giọt cà phê chắt lọc từ những hạt Robusta & Arabica cao cấp nhất, mang đến cho bạn phút giây lắng đọng giữa nhịp sống hối hả.</p>
+      <div class="hero-actions">
+        <a href="#menu-section" class="btn btn-primary">
+          <i class="fa-solid fa-mug-saucer"></i> Khám phá thực đơn
+        </a>
+        {% if not current_user %}
+        <a href="/register" class="btn btn-outline-white">
+          <i class="fa-solid fa-gift"></i> Đăng ký thành viên nhận ưu đãi
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Gợi ý hôm nay (Featured) -->
+  <section class="featured-section" aria-labelledby="featured-title">
+    <div class="section-header">
+      <div>
+        <h2 id="featured-title" class="section-title"><i class="fa-solid fa-star text-caramel"></i> Gợi ý hôm nay</h2>
+        <p class="section-subtitle">Những thức uống và món bánh được yêu thích nhất trong ngày</p>
+      </div>
+    </div>
+    <div class="featured-grid">
+      {% for p in featured_products %}
+      <article class="card card-featured" data-id="{{ p.id }}" data-cat="{{ p.category_id }}" data-name="{{ p.name }}" data-price="{{ p.price }}" data-image="/{{ p.image }}" data-desc="{{ p.description }}" tabindex="0" role="button">
+        <div class="card-media">
+          <img src="/{{ p.image }}" alt="{{ p.name }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'img-fallback\'><span>{{ p.name }}</span></div>'">
+          <span class="card-badge">Hot</span>
+        </div>
+        <div class="card-body">
+          <span class="card-cat">{{ p.category_name }}</span>
+          <h3 class="card-title">{{ p.name }}</h3>
+          <div class="card-foot">
+            <span class="price">{{ p.price | format_price }}</span>
+            <button type="button" class="btn-add-cart btn-sm" onclick="event.stopPropagation(); addToCart({{ p.id }}, '{{ p.name }}', {{ p.price }})">
+              <i class="fa-solid fa-plus"></i> Đặt món
+            </button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Thực đơn (Menu) -->
+  <section class="menu-section" id="menu-section" aria-labelledby="menu-title">
+    <div class="section-header">
+      <div>
+        <h2 id="menu-title" class="section-title"><i class="fa-solid fa-list-ul text-caramel"></i> Danh mục thực đơn</h2>
+        <p class="section-subtitle">Đa dạng lựa chọn từ Cà phê phin truyền thống, Freeze mát lạnh, Trà thanh mát và Bánh ngọt thơm lừng</p>
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="tabs" id="tabs" role="tablist">
+      <button type="button" class="tab active" data-cat="all" role="tab" aria-selected="true">
+        Tất cả <span class="tab-count">({{ products | length }})</span>
+      </button>
+      {% for cat in categories %}
+      <button type="button" class="tab" data-cat="{{ cat.id }}" role="tab" aria-selected="false">
+        {{ cat.name }} <span class="tab-count">({{ cat.count }})</span>
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Toolbar: Search & Sort -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="search" id="search-input" placeholder="Tìm món ngon... (ví dụ: phin đen, freeze, trà đào...)" autocomplete="off">
+        <button type="button" id="search-clear" class="search-clear" title="Xóa tìm kiếm" hidden>&times;</button>
+      </div>
+      <div class="sort-box">
+        <label for="sort-select"><i class="fa-solid fa-arrow-down-short-wide"></i> Sắp xếp:</label>
+        <select id="sort-select">
+          <option value="default">Mặc định</option>
+          <option value="price-asc">Giá tăng dần</option>
+          <option value="price-desc">Giá giảm dần</option>
+          <option value="name-asc">Tên A-Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Category Description -->
+    {% for cat in categories %}
+    {% if cat.description %}
+    <div class="cat-desc-panel" id="cat-desc-{{ cat.id }}" hidden>
+      <i class="fa-solid fa-circle-info text-caramel"></i> {{ cat.description }}
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Filter result count -->
+    <p class="result-count" id="result-count" aria-live="polite">Hiển thị {{ products | length }} món</p>
+
+    <!-- Products Grid -->
+    <div class="grid" id="product-grid">
+      {% for p in products %}
+      <article class="card product-card" 
+               data-id="{{ p.id }}" 
+               data-cat="{{ p.category_id }}" 
+               data-name="{{ p.name }}" 
+               data-price="{{ p.price }}" 
+               data-image="/{{ p.image }}" 
+               data-desc="{{ p.description }}" 
+               tabindex="0" 
+               role="button" 
+               aria-label="Xem chi tiết {{ p.name }}">
+        <div class="card-media">
+          <img src="/{{ p.image }}" alt="{{ p.name }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'img-fallback\'><span>{{ p.name }}</span></div>'">
+        </div>
+        <div class="card-body">
+          <span class="card-cat">{{ p.category_name }}</span>
+          <h3 class="card-title">{{ p.name }}</h3>
+          <p class="card-desc-preview">{{ p.description }}</p>
+          <div class="card-foot">
+            <span class="price">{{ p.price | format_price }}</span>
+            <button type="button" class="btn-add-cart btn-sm" onclick="event.stopPropagation(); addToCart({{ p.id }}, '{{ p.name }}', {{ p.price }})">
+              <i class="fa-solid fa-cart-plus"></i> Đặt món
+            </button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- Empty message -->
+    <div class="empty-state" id="empty-state" hidden>
+      <i class="fa-solid fa-magnifying-glass-chart empty-icon"></i>
+      <h3>Không tìm thấy món nào phù hợp</h3>
+      <p>Thử tìm kiếm với từ khóa khác hoặc bấm nút bên dưới để xem lại tất cả món ăn.</p>
+      <button type="button" class="btn btn-outline" id="btn-reset-filter">Xem tất cả món</button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Quick View & Order -->
+<div class="modal" id="product-modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" type="button" aria-label="Đóng" data-close>
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <div class="modal-media" id="modal-media"></div>
+    <div class="modal-body">
+      <span class="badge" id="modal-cat"></span>
+      <h3 id="modal-title" class="modal-title"></h3>
+      <p class="price modal-price" id="modal-price"></p>
+      <div class="modal-desc-box">
+        <p class="modal-desc" id="modal-desc"></p>
+      </div>
+
+      <div class="modal-order-panel">
+        <div class="quantity-selector">
+          <label for="modal-qty">Số lượng:</label>
+          <div class="qty-control">
+            <button type="button" class="btn-qty" id="qty-minus"><i class="fa-solid fa-minus"></i></button>
+            <input type="number" id="modal-qty" value="1" min="1" max="99" readonly>
+            <button type="button" class="btn-qty" id="qty-plus"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="modal-action-buttons">
+          <button type="button" class="btn btn-primary btn-block" id="modal-btn-add">
+            <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ hàng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
