@@ -663,10 +663,10 @@ def checkout():
 
 
 if __name__ == "__main__":
-    # Chạy trên localhost:5000
+    port = int(os.environ.get("PORT", 5000))
     print("==================================================")
     print("  CoffeeShop Web Động (Python + SQLite)")
-    print("  Đang chạy tại: http://127.0.0.1:5000")
+    print(f"  Đang chạy tại: http://127.0.0.1:{port}")
     print("  Tài khoản dùng thử: khachhang / 123456")
     print("==================================================")
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
